@@ -117,10 +117,10 @@ cleanScreen:
     li t2 32
     addi sp sp -4
     sw ra 0(sp)
-    cleanScreen_loop_externo_beg:
+    cleanScreen_loop_externo_beg: #no final de cada linha, volta a fazer a coluna
         beq t1 t2 cleanScreen_loop_externo_end 
         li t0 0
-        cleanScreen_loop_interno_beg:
+        cleanScreen_loop_interno_beg: #percorre cada linha e coloca o ponto a branco
             beq t0 t2 cleanScreen_loop_interno_end
             mv a0 t0
             mv a1 t1
@@ -148,18 +148,21 @@ printClusters:
     # POR IMPLEMENTAR (1a e 2a parte)
     lw t3 k
     li t4 1
-    bne t3 t4 printClusters_bigif_beg
+    bne t3 t4 printClusters_bigif_beg #verifica se o k é igual a 1
+    #sendo igual a 1, então percorre o vetor de pontos e imprime-os no ecrã
     lw t0 n_points
     la t1 points
     li a2 black
-    printClusters_loop_beg:
-        beq t0 x0 printClusters_loop_end
+    printClusters_loop_beg: #percorre o vetor de pontos e coloca-os no ecrã
+        beq t0 x0 printClusters_loop_end #verifica se se chegou ao final do vetor 
         lw a0 0(t1)
         lw a1 4(t1)
+        #tratar do call stack
         addi sp sp -4
-        sw ra 0(sp)
+        sw ra 0(sp) 
         jal printPoint
         lw ra 0(sp)
+        #destruir o call stack
         addi sp sp 4
         addi t1 t1 8
         addi t0 t0 -1
