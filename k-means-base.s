@@ -7,7 +7,7 @@
 # Autores:
 # 109493, Francisco Martins
 # 110425, Margarida Paiva
-# n_aluno, nome
+# 109617, Hern‚ni Mour„o
 #
 # Tecnico/ULisboa
 
@@ -106,7 +106,7 @@ printPoint:
     
 
 ### cleanScreen
-# Limpa todos os pontos do ecr√£
+# Limpa todos os pontos do ecr„
 # Argumentos: nenhum
 # Retorno: nenhum
 
@@ -148,12 +148,12 @@ printClusters:
     # POR IMPLEMENTAR (1a e 2a parte)
     lw t3 k
     li t4 1
-    bne t3 t4 printClusters_bigif_beg #verifica se o k √© igual a 1
-    #sendo igual a 1, ent√£o percorre o vetor de pontos e imprime-os no ecr√£
+    bne t3 t4 printClusters_bigif_beg #verifica se o k È igual a 1
+    #sendo igual a 1, ent„o percorre o vetor de pontos e imprime-os no ecr„
     lw t0 n_points
     la t1 points
     li a2 black
-    printClusters_loop_beg: #percorre o vetor de pontos e coloca-os no ecr√£
+    printClusters_loop_beg: #percorre o vetor de pontos e coloca-os no ecr„
         beq t0 x0 printClusters_loop_end #verifica se se chegou ao final do vetor 
         lw a0 0(t1)
         lw a1 4(t1)
@@ -193,6 +193,33 @@ printCentroids:
 
 calculateCentroids:
     # POR IMPLEMENTAR (1a e 2a parte)
+    lw t3, k
+    li t4, 1
+    lw t0, n_points #Utilizamos duas vezes n_points, uma para percorrer o vetor e a segunda para calcular a media
+    lw t2, n_points
+    lw t1, points
+    lw t3, centroids
+    bne t3, t4, calculateCentroids_bigif_bge #verifica se k=1, se este for o caso basta percorrer o vetor points
+    lw t5, x0 #coordenada x do unico centroid
+    lw t6, x0 #coordenada y do unico centroid
+    calculateCentroids_loop: #percorre o vetor points de modo a calcular o centroid
+        beq t0, x0, calculateCentroids_loop_end #verificar se chegamos ao final do vetor
+        lw a0, 0(t1)
+        lw a1, 4(t1)
+        add t5, t5, a0
+        add t6, t6, a1
+        addi t1, t1, 8 #andar para a frente no vetor points
+        addi t0, t0, -1 #reduzir o numero de elementos restantes
+        j calculateCentroids_loop
+    calculateCentroids_loop_end:
+        div t5, t5, t2 #fazer a media para descobrir as coordenadas do centroid
+        div t6, t6, t2
+        sw t5, 0(t3) #guardar as coordenadas do centroid no vetor centroids
+        sw t6, 4(t3)
+    calculateCentroids_bigif_bge:
+        #Por implementar
+    calculateCentroids_bigif_end:
+        #Por implementar
     jr ra
 
 
