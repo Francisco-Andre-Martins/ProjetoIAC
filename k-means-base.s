@@ -7,7 +7,7 @@
 # Autores:
 # 109493, Francisco Martins
 # 110425, Margarida Paiva
-# n_aluno, nome
+# 109617, Hernâni Mourão
 #
 # Tecnico/ULisboa
 
