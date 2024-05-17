@@ -213,15 +213,15 @@ printCentroids:
 
 calculateCentroids:
     # POR IMPLEMENTAR (1a e 2a parte)
-    lw t3, k
+    lw a4, k
     li t4, 1
     lw t0, n_points #Utilizamos duas vezes n_points, uma para percorrer o vetor e a segunda para calcular a media
     lw t2, n_points
-    lw t1, points
-    lw t3, centroids
-    bne t3, t4, calculateCentroids_bigif_bge #verifica se k=1, se este for o caso basta percorrer o vetor points
-    lw t5, x0 #coordenada x do unico centroid
-    lw t6, x0 #coordenada y do unico centroid
+    la t1, points
+    la t3, centroids
+    bne a4, t4, calculateCentroids_bigif_bge #verifica se k=1, se este for o caso basta percorrer o vetor points
+    addi t5, x0 0 #coordenada x do unico centroid
+    addi t6, x0 0 #coordenada y do unico centroid
     calculateCentroids_loop: #percorre o vetor points de modo a calcular o centroid
         beq t0, x0, calculateCentroids_loop_end #verificar se chegamos ao final do vetor
         lw a0, 0(t1)
