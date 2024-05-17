@@ -2,7 +2,7 @@
 # IAC 2023/2024 k-means
 # 
 # Grupo: Em_cima_do_Joelho
-# Campus:
+# Campus: 
 #
 # Autores:
 # 109493, Francisco Martins
@@ -34,7 +34,7 @@
 
 #Input C
 #n_points:    .word 23
-#points: .word 0,0, 0,1, 0,2, 1,0, 1,1, 1,2, 1,3, 2,0, 2,1, 5,3, 6,2, 6,3, 6,4, 7,2, 7,3, 6,8, 6,9, 7,8, 8,7, 8,8, 8,9, 9,7, 9,8
+p#oints: .word 0,0, 0,1, 0,2, 1,0, 1,1, 1,2, 1,3, 2,0, 2,1, 5,3, 6,2, 6,3, 6,4, 7,2, 7,3, 6,8, 6,9, 7,8, 8,7, 8,8, 8,9, 9,7, 9,8
 
 #Input D
 n_points:    .word 30
@@ -106,7 +106,7 @@ printPoint:
     
 
 ### cleanScreen
-# Limpa todos os pontos do ecrÃ£
+# Limpa todos os pontos do ecrã
 # Argumentos: nenhum
 # Retorno: nenhum
 
@@ -118,8 +118,8 @@ cleanScreen:
     addi sp sp -4
     sw ra 0(sp)
     cleanScreen_loop_externo_beg:
-        beq t1 t2 cleanScreen_loop_externo_end 
-        li t0 0
+       beq t1 t2 cleanScreen_loop_externo_end 
+       li t0 0
         cleanScreen_loop_interno_beg:
             beq t0 t2 cleanScreen_loop_interno_end
             mv a0 t0
@@ -151,7 +151,9 @@ printClusters:
     bne t3 t4 printClusters_bigif_beg
     lw t0 n_points
     la t1 points
-    li a2 black
+    la t2 colors
+    lw a2 0(t2)
+    
     printClusters_loop_beg:
         beq t0 x0 printClusters_loop_end
         lw a0 0(t1)
@@ -180,6 +182,27 @@ printClusters:
 
 printCentroids:
     # POR IMPLEMENTAR (1a e 2a parte)
+    li t0 0           
+    li t1 2          
+    li t2 0          # Inicializar o vetor
+    la t3 centroids  
+    lw t4 k          
+    li a2 black     
+
+    printCentroids_loop:
+        mul t6 t0 t1    # Deslocamento centroide 
+        add t6 t6 t3    
+
+        # Coordenadas do centróide atual
+        lw a0 0(t6)      #coordenada x 
+        lw a1 4(t6)      # coordenada y 
+        addi sp sp -4
+        sw ra 0(sp)
+        jal printPoint
+        lw ra 0(sp)
+        addi sp sp 4
+        addi t0 t0 1    # próximo centróide
+        blt t0 t4 printCentroids_loop
     jr ra
     
 
@@ -187,10 +210,6 @@ printCentroids:
 # Calcula os k centroides, a partir da distribuicao atual de pontos associados a cada agrupamento (cluster)
 # Argumentos: nenhum
 # Retorno: nenhum
-
-calculateCentroids:
-    # POR IMPLEMENTAR (1a e 2a parte)
-    jr ra
 
 
 ### mainSingleCluster
@@ -202,6 +221,10 @@ mainSingleCluster:
     # temp code
     jal cleanScreen
     jal printClusters
+    jal calculateCentroids
+    jal printCentroids
+    #guardar valor de ra
+    
     #1. Coloca k=1 (caso nao esteja a 1)
     # POR IMPLEMENTAR (1a parte)
 
