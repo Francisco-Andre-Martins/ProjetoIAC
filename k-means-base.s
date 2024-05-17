@@ -2,7 +2,7 @@
 # IAC 2023/2024 k-means
 # 
 # Grupo: Em_cima_do_Joelho
-# Campus: 
+# Campus: Alameda
 #
 # Autores:
 # 109493, Francisco Martins
@@ -106,21 +106,20 @@ printPoint:
     
 
 ### cleanScreen
-# Limpa todos os pontos do ecrã
+# Limpa todos os pontos do ecra
 # Argumentos: nenhum
 # Retorno: nenhum
 
 cleanScreen:
-    # POR IMPLEMENTAR (1a parte)
     li t0 0
     li t1 0
     li t2 32
     addi sp sp -4
     sw ra 0(sp)
-    cleanScreen_loop_externo_beg: #no final de cada linha, volta a fazer a coluna
+    cleanScreen_loop_externo_beg:
        beq t1 t2 cleanScreen_loop_externo_end 
        li t0 0
-        cleanScreen_loop_interno_beg: #percorre cada linha e coloca o ponto a branco
+        cleanScreen_loop_interno_beg:
             beq t0 t2 cleanScreen_loop_interno_end
             mv a0 t0
             mv a1 t1
@@ -145,31 +144,25 @@ cleanScreen:
 # Retorno: nenhum
 
 printClusters:
-    # POR IMPLEMENTAR (1a e 2a parte)
+    # POR IMPLEMENTAR (2a parte)
     lw t3 k
     li t4 1
-    #verifica se o k é igual a 1
-    #sendo igual a 1, então percorre o vetor de pontos e imprime-os no ecrã
     bne t3 t4 printClusters_bigif_beg
     lw t0 n_points
     la t1 points
     la t2 colors
     lw a2 0(t2)
     
-    printClusters_loop_beg: #percorre o vetor de pontos e coloca-os no ecrã
-        beq t0 x0 printClusters_loop_end #verifica se se chegou ao final do vetor
+    printClusters_loop_beg:
+        beq t0 x0 printClusters_loop_end
         lw a0 0(t1)
         lw a1 4(t1)
-        #tratar do call stack
         addi sp sp -4
         sw ra 0(sp)
         jal printPoint
         lw ra 0(sp)
-        #destruir o call stack
         addi sp sp 4
-        #incrementar o endereço dos pontos para passar ao seguinte
         addi t1 t1 8
-        #decrementar o número de pontos que falta verificar
         addi t0 t0 -1
         j printClusters_loop_beg
     printClusters_loop_end:
@@ -187,7 +180,7 @@ printClusters:
 # Retorno: nenhum
 
 printCentroids:
-    # POR IMPLEMENTAR (1a e 2a parte)
+    # POR IMPLEMENTAR (2a parte)
     li t0 0           
     li t1 2          
     li t2 0          # Inicializar o vetor
@@ -199,7 +192,6 @@ printCentroids:
         mul t6 t0 t1    # Deslocamento centroide 
         add t6 t6 t3    
 
-        # Coordenadas do centróide atual
         lw a0 0(t6)      #coordenada x 
         lw a1 4(t6)      # coordenada y 
         addi sp sp -4
@@ -207,7 +199,7 @@ printCentroids:
         jal printPoint
         lw ra 0(sp)
         addi sp sp 4
-        addi t0 t0 1    # próximo centróide
+        addi t0 t0 1    # proximo centroide
         blt t0 t4 printCentroids_loop
     jr ra
     
@@ -218,7 +210,7 @@ printCentroids:
 # Retorno: nenhum
 
 calculateCentroids:
-    # POR IMPLEMENTAR (1a e 2a parte)
+    # POR IMPLEMENTAR (2a parte)
     lw a4, k
     li t4, 1
     lw t0, n_points #Utilizamos duas vezes n_points, uma para percorrer o vetor e a segunda para calcular a media
@@ -254,29 +246,31 @@ calculateCentroids:
 # Retorno: nenhum
 
 mainSingleCluster:
-    # temp code
-    jal cleanScreen
-    jal printClusters
-    jal calculateCentroids
-    jal printCentroids
-    #guardar valor de ra
     
     #1. Coloca k=1 (caso nao esteja a 1)
-    # POR IMPLEMENTAR (1a parte)
-
+    lw t1 k
+    li t2 1
+    bne t1 t2 mainSingleCuster_bigif_bge
+    
     #2. cleanScreen
-    # POR IMPLEMENTAR (1a parte)
-
+    jal cleanScreen
+    
     #3. printClusters
-    # POR IMPLEMENTAR (1a parte)
-
+    jal printClusters
+    
     #4. calculateCentroids
-    # POR IMPLEMENTAR (1a parte)
-
+    jal calculateCentroids
+    
     #5. printCentroids
-    # POR IMPLEMENTAR (1a parte)
-
+    jal printCentroids
+    
     #6. Termina
+    mainSingleCuster_bigif_bge:
+        #por implementar
+    addi sp sp -4
+    sw ra 0(sp)
+    lw ra 0(sp)
+    addi sp sp 4    
     jr ra
 
 
