@@ -7,7 +7,7 @@
 # Autores:
 # 109493, Francisco Martins
 # 110425, Margarida Paiva
-# 109617, HernÃ¢ni MourÃ£o
+# n_aluno, nome
 #
 # Tecnico/ULisboa
 
@@ -106,7 +106,7 @@ printPoint:
     
 
 ### cleanScreen
-# Limpa todos os pontos do ecrï¿½
+# Limpa todos os pontos do ecrã
 # Argumentos: nenhum
 # Retorno: nenhum
 
@@ -117,10 +117,10 @@ cleanScreen:
     li t2 32
     addi sp sp -4
     sw ra 0(sp)
-    cleanScreen_loop_externo_beg: #no final de cada linha, volta a fazer a coluna
-        beq t1 t2 cleanScreen_loop_externo_end 
-        li t0 0
-        cleanScreen_loop_interno_beg: #percorre cada linha e coloca o ponto a branco
+    cleanScreen_loop_externo_beg:
+       beq t1 t2 cleanScreen_loop_externo_end 
+       li t0 0
+        cleanScreen_loop_interno_beg:
             beq t0 t2 cleanScreen_loop_interno_end
             mv a0 t0
             mv a1 t1
@@ -148,21 +148,20 @@ printClusters:
     # POR IMPLEMENTAR (1a e 2a parte)
     lw t3 k
     li t4 1
-    bne t3 t4 printClusters_bigif_beg #verifica se o k Ã© igual a 1
-    #sendo igual a 1, entÃ£o percorre o vetor de pontos e imprime-os no ecrÃ£
+    bne t3 t4 printClusters_bigif_beg
     lw t0 n_points
     la t1 points
-    li a2 black
-    printClusters_loop_beg: #percorre o vetor de pontos e coloca-os no ecrÃ£
-        beq t0 x0 printClusters_loop_end #verifica se se chegou ao final do vetor 
+    la t2 colors
+    lw a2 0(t2)
+    
+    printClusters_loop_beg:
+        beq t0 x0 printClusters_loop_end
         lw a0 0(t1)
         lw a1 4(t1)
-        #tratar do call stack
         addi sp sp -4
-        sw ra 0(sp) 
+        sw ra 0(sp)
         jal printPoint
         lw ra 0(sp)
-        #destruir o call stack
         addi sp sp 4
         addi t1 t1 8
         addi t0 t0 -1
@@ -194,7 +193,7 @@ printCentroids:
         mul t6 t0 t1    # Deslocamento centroide 
         add t6 t6 t3    
 
-        # Coordenadas do centrï¿½ide atual
+        # Coordenadas do centróide atual
         lw a0 0(t6)      #coordenada x 
         lw a1 4(t6)      # coordenada y 
         addi sp sp -4
@@ -202,7 +201,7 @@ printCentroids:
         jal printPoint
         lw ra 0(sp)
         addi sp sp 4
-        addi t0 t0 1    # prï¿½ximo centrï¿½ide
+        addi t0 t0 1    # próximo centróide
         blt t0 t4 printCentroids_loop
     jr ra
     
@@ -211,37 +210,6 @@ printCentroids:
 # Calcula os k centroides, a partir da distribuicao atual de pontos associados a cada agrupamento (cluster)
 # Argumentos: nenhum
 # Retorno: nenhum
-
-calculateCentroids:
-    # POR IMPLEMENTAR (1a e 2a parte)
-    lw t3, k
-    li t4, 1
-    lw t0, n_points #Utilizamos duas vezes n_points, uma para percorrer o vetor e a segunda para calcular a media
-    lw t2, n_points
-    lw t1, points
-    lw t3, centroids
-    bne t3, t4, calculateCentroids_bigif_bge #verifica se k=1, se este for o caso basta percorrer o vetor points
-    lw t5, x0 #coordenada x do unico centroid
-    lw t6, x0 #coordenada y do unico centroid
-    calculateCentroids_loop: #percorre o vetor points de modo a calcular o centroid
-        beq t0, x0, calculateCentroids_loop_end #verificar se chegamos ao final do vetor
-        lw a0, 0(t1)
-        lw a1, 4(t1)
-        add t5, t5, a0
-        add t6, t6, a1
-        addi t1, t1, 8 #andar para a frente no vetor points
-        addi t0, t0, -1 #reduzir o numero de elementos restantes
-        j calculateCentroids_loop
-    calculateCentroids_loop_end:
-        div t5, t5, t2 #fazer a media para descobrir as coordenadas do centroid
-        div t6, t6, t2
-        sw t5, 0(t3) #guardar as coordenadas do centroid no vetor centroids
-        sw t6, 4(t3)
-    calculateCentroids_bigif_bge:
-        #Por implementar
-    calculateCentroids_bigif_end:
-        #Por implementar
-    jr ra
 
 
 ### mainSingleCluster
