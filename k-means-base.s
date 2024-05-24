@@ -1,12 +1,12 @@
 #
 # IAC 2023/2024 k-means
-# 
+# teste
 # Grupo: Em_cima_do_Joelho
 # Campus: Alameda
 #
 # Autores:
 # 109493, Francisco Martins
-# 110425, Margarida Paiva
+# 110425, Margarida Paiva123
 # 109617, Hernâni Mourão
 #
 # Tecnico/ULisboa
@@ -43,13 +43,13 @@ points:      .word 16, 1, 17, 2, 18, 6, 20, 3, 21, 1, 17, 4, 21, 7, 16, 4, 21, 6
 
 
 # Valores de centroids e k a usar na 1a parte do projeto:
-centroids:   .word 0,0
-k:           .word 1
+#centroids:   .word 0,0
+#k:           .word 1
 
 # Valores de centroids, k e L a usar na 2a parte do prejeto:
-#centroids:   .word 0,0, 10,0, 0,10
-#k:           .word 3
-#L:           .word 10
+centroids:   .word 0,0, 10,0, 0,10
+k:           .word 3
+L:           .word 10
 
 # Abaixo devem ser declarados o vetor clusters (2a parte) e outras estruturas de dados
 # que o grupo considere necessarias para a solucao:
@@ -71,10 +71,10 @@ colors:      .word 0xff0000, 0x00ff00, 0x0000ff  # Cores dos pontos do cluster 0
  
 .text
     # Chama funcao principal da 1a parte do projeto
-    jal mainSingleCluster
+    #jal mainSingleCluster
 
     # Descomentar na 2a parte do projeto:
-    #jal mainKMeans
+    jal mainKMeans
     
     #Termina o programa (chamando chamada sistema)
     li a7, 10
@@ -278,9 +278,54 @@ mainSingleCluster:
     lw ra 0(sp)
     addi sp sp 4    
     jr ra
-
-
-
+### PseudoRandomNumberGen
+# Argumentos: nenhum
+# Retorno: a0 número
+PseudoRandomNumberGen:
+    li a7 31
+    ecall
+    mv t1 a0
+    li a7 30
+    ecall
+    mv t2 a0
+    li t3 32
+    rem t1 t1 t3
+    rem t2 t2 t3
+    add t2 t1 t2
+    rem t2 t2 t3
+    bge t2 x0 PseudoRandomNumberGen_end_1stif
+    sub t2 x0 t2
+    PseudoRandomNumberGen_end_1stif:
+        mv a0 t2
+    jr ra
+### initializeCentroids
+#Este procedimento incializa os valores inciais do vetor centroides. 
+#Cada um dos k centroids deve ser colocado num par de coordenadas
+#escolhido de forma pseudo-aleatória
+# Argumentos: nenhum
+# Retorno: nenhum
+initializeCentroids:
+    lw t0 k
+    la t6 centroids
+    addi sp sp -4
+    sw ra 0(sp)
+    initializeCentroids_loop:
+        jal PseudoRandomNumberGen
+        mv t4 a0
+        jal PseudoRandomNumberGen
+        mv t5 a0
+        sw t4 0(t6)
+        sw t5 4(t6)
+        addi t6 t6 8
+        addi t0 t0 -1
+        beq t0 x0 initializeCentroids_endloop
+        j initializeCentroids_loop
+    initializeCentroids_endloop:
+    lw ra 0(sp)
+    addi sp sp 4
+    
+    jr ra
+    
 ### manhattanDistance
 # Calcula a distancia de Manhattan entre (x0,y0) e (x1,y1)
 # Argumentos:
@@ -291,6 +336,15 @@ mainSingleCluster:
 
 manhattanDistance:
     # POR IMPLEMENTAR (2a parte)
+    sub a0 a0 a2
+    bge a0 x0 manhattanDistance_end_1stif
+    sub a0 x0 a0
+    manhattanDistance_end_1stif:
+    sub a1 a1 a3
+    bge a1 x0 manhattanDistance_end_2ndtif
+    sub a1 x0 a1
+    manhattanDistance_end_2ndtif:
+    add a0 a0 a1
     jr ra
 
 
@@ -310,7 +364,9 @@ nearestCluster:
 # Executa o algoritmo *k-means*.
 # Argumentos: nenhum
 # Retorno: nenhum
+    
 
 mainKMeans:  
     # POR IMPLEMENTAR (2a parte)
+    jal initializeCentroids
     jr ra
