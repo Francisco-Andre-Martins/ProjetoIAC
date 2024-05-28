@@ -54,7 +54,7 @@ L:           .word 10
 # Abaixo devem ser declarados o vetor clusters (2a parte) e outras estruturas de dados
 # que o grupo considere necessarias para a solucao:
 #clusters:    
-#clusters: .zero 120
+clusters: .zero 120
 
 
 
@@ -145,20 +145,24 @@ cleanScreen:
 
 printClusters:
     # POR IMPLEMENTAR (2a parte)
-    lw t3 k
-    li t4 1
-    #verifica se o k é igual a 1
-    #sendo igual a 1, então percorre o vetor de pontos e imprime-os no ecrã
-    bne t3 t4 printClusters_bigif_beg
+  
+
     lw t0 n_points
     la t1 points
-    la t2 colors
-    lw a2 0(t2)
+    li t6 4
+    la t3 clusters
+    #t2 fica com a cor atual, refreshed em cada ciclo com o início do vetor cores
     
     printClusters_loop_beg: #percorre o vetor de pontos e coloca-os no ecrã
         beq t0 x0 printClusters_loop_end #verifica se se chegou ao final do vetor
+        la t2 colors
         lw a0 0(t1)
         lw a1 4(t1)
+        lw t5 0(t3)
+        mul t5 t5 t6 #vejo que cluster é, e faço correspondência com a sua cor
+        add t2 t2 t5
+        lw a3 0(t2)
+        
         #tratar do call stack
         addi sp sp -4
         sw ra 0(sp)
@@ -168,6 +172,8 @@ printClusters:
         addi sp sp 4
         #incrementar o endereço dos pontos para passar ao seguinte
         addi t1 t1 8
+        #incrementar o endereço do vetor clusters para passar ao seguinte
+        addi t3 t3 4
         #decrementar o número de pontos que falta verificar
         addi t0 t0 -1
         j printClusters_loop_beg
