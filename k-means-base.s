@@ -1,12 +1,12 @@
 #
 # IAC 2023/2024 k-means
 # teste
-# Grupo: Em_cima_do_Joelho
+# Grupo: 40
 # Campus: Alameda
 #
 # Autores:
 # 109493, Francisco Martins
-# 110425, Margarida Paiva123
+# 110425, Margarida Paiva
 # 109617, Hernâni Mourão
 #
 # Tecnico/ULisboa
