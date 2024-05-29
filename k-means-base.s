@@ -1,12 +1,12 @@
 #
 # IAC 2023/2024 k-means
 # teste
-# Grupo: Em_cima_do_Joelho
+# Grupo: 40
 # Campus: Alameda
 #
 # Autores:
 # 109493, Francisco Martins
-# 110425, Margarida Paiva123
+# 110425, Margarida Paiva
 # 109617, Hernâni Mourão
 #
 # Tecnico/ULisboa
@@ -53,8 +53,8 @@ L:           .word 10
 
 # Abaixo devem ser declarados o vetor clusters (2a parte) e outras estruturas de dados
 # que o grupo considere necessarias para a solucao:
-clusters: .word 1,2,0,1,2,1,2,0,1,2,1,2,1,2,1,2,1,2,1,2,1,0,0,0,0,0,0,0,0,1    
-#clusters: .zero 120
+#clusters: .word 1,2,0,1,2,1,2,0,1,2,1,2,1,2,1,2,1,2,1,2,1,0,0,0,0,0,0,0,0,1    
+clusters: .zero 120
 
 
 
