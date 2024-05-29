@@ -1,12 +1,12 @@
 #
 # IAC 2023/2024 k-means
 # teste
-# Grupo: 40
+# Grupo: Em_cima_do_Joelho
 # Campus: Alameda
 #
 # Autores:
 # 109493, Francisco Martins
-# 110425, Margarida Paiva
+# 110425, Margarida Paiva123
 # 109617, Hernâni Mourão
 #
 # Tecnico/ULisboa
@@ -53,8 +53,8 @@ L:           .word 10
 
 # Abaixo devem ser declarados o vetor clusters (2a parte) e outras estruturas de dados
 # que o grupo considere necessarias para a solucao:
-#clusters:    
-clusters: .zero 120
+clusters: .word 1,2,0,1,2,1,2,0,1,2,1,2,1,2,1,2,1,2,1,2,1,0,0,0,0,0,0,0,0,1    
+#clusters: .zero 120
 
 
 
@@ -145,7 +145,10 @@ cleanScreen:
 
 printClusters:
     # POR IMPLEMENTAR (2a parte)
-  
+    addi sp sp -12
+    sw a0 0(sp)
+    sw a1 4(sp)
+    sw a2 8(sp)
 
     lw t0 n_points
     la t1 points
@@ -161,7 +164,7 @@ printClusters:
         lw t5 0(t3)
         mul t5 t5 t6 #vejo que cluster é, e faço correspondência com a sua cor
         add t2 t2 t5
-        lw a3 0(t2)
+        lw a2 0(t2)
         
         #tratar do call stack
         addi sp sp -4
@@ -182,8 +185,11 @@ printClusters:
     printClusters_bigif_beg:
         
     printClusters_bigif_end:
+    lw a0 0(sp)
+    lw a1 4(sp)
+    lw a2 8(sp)
+    addi sp sp 12
     jr ra
-
 
 ### printCentroids
 # Pinta os centroides na LED matrix
@@ -193,13 +199,13 @@ printClusters:
 
 printCentroids:
     # POR IMPLEMENTAR (2a parte)
-    li t0 0           
-    li t1 2          
-    li t2 0          # Inicializar o vetor
+    li t0 0          
+    li t1 8         
+    #li t2 0          # Inicializar o vetor
     la t3 centroids  
     lw t4 k          
     li a2 black     
-
+    
     printCentroids_loop:
         mul t6 t0 t1    # Deslocamento centroide 
         add t6 t6 t3    
@@ -211,8 +217,9 @@ printCentroids:
         jal printPoint
         lw ra 0(sp)
         addi sp sp 4
+        
         addi t0 t0 1    # proximo centroide
-        blt t0 t4 printCentroids_loop
+        bne t0 t4 printCentroids_loop
     jr ra
     
 
@@ -374,5 +381,9 @@ nearestCluster:
 
 mainKMeans:  
     # POR IMPLEMENTAR (2a parte)
+    jal cleanScreen
+    
     jal initializeCentroids
+    jal printCentroids
+    jal printClusters
     jr ra
