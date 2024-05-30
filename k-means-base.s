@@ -7,7 +7,7 @@
 # Autores:
 # 109493, Francisco Martins
 # 110425, Margarida Paiva
-# 109617, Hernâni Mourão
+# 109617, HernÃ¢ni MourÃ£o
 #
 # Tecnico/ULisboa
 
@@ -33,12 +33,12 @@
 #points:     .word 4,2, 5,1, 5,2, 5,3 6,2
 
 #Input C
-n_points:    .word 23
-points: .word 0,0, 0,1, 0,2, 1,0, 1,1, 1,2, 1,3, 2,0, 2,1, 5,3, 6,2, 6,3, 6,4, 7,2, 7,3, 6,8, 6,9, 7,8, 8,7, 8,8, 8,9, 9,7, 9,8
+#n_points:    .word 23
+#points: .word 0,0, 0,1, 0,2, 1,0, 1,1, 1,2, 1,3, 2,0, 2,1, 5,3, 6,2, 6,3, 6,4, 7,2, 7,3, 6,8, 6,9, 7,8, 8,7, 8,8, 8,9, 9,7, 9,8
 
 #Input D
-#n_points:    .word 30
-#points:      .word 16, 1, 17, 2, 18, 6, 20, 3, 21, 1, 17, 4, 21, 7, 16, 4, 21, 6, 19, 6, 4, 24, 6, 24, 8, 23, 6, 26, 6, 26, 6, 23, 8, 25, 7, 26, 7, 20, 4, 21, 4, 10, 2, 10, 3, 11, 2, 12, 4, 13, 4, 9, 4, 9, 3, 8, 0, 10, 4, 10
+n_points:    .word 30
+points:      .word 16, 1, 17, 2, 18, 6, 20, 3, 21, 1, 17, 4, 21, 7, 16, 4, 21, 6, 19, 6, 4, 24, 6, 24, 8, 23, 6, 26, 6, 26, 6, 23, 8, 25, 7, 26, 7, 20, 4, 21, 4, 10, 2, 10, 3, 11, 2, 12, 4, 13, 4, 9, 4, 9, 3, 8, 0, 10, 4, 10
 
 
 
@@ -154,15 +154,15 @@ printClusters:
     la t1 points
     li t6 4
     la t3 clusters
-    #t2 fica com a cor atual, refreshed em cada ciclo com o início do vetor cores
+    #t2 fica com a cor atual, refreshed em cada ciclo com o inÃ­cio do vetor cores
     
-    printClusters_loop_beg: #percorre o vetor de pontos e coloca-os no ecrã
+    printClusters_loop_beg: #percorre o vetor de pontos e coloca-os no ecrÃ£
         beq t0 x0 printClusters_loop_end #verifica se se chegou ao final do vetor
         la t2 colors
         lw a0 0(t1)
         lw a1 4(t1)
         lw t5 0(t3)
-        mul t5 t5 t6 #vejo que cluster é, e faço correspondência com a sua cor
+        mul t5 t5 t6 #vejo que cluster Ã©, e faÃ§o correspondÃªncia com a sua cor
         add t2 t2 t5
         lw a2 0(t2)
         
@@ -173,11 +173,11 @@ printClusters:
         lw ra 0(sp)
         #destruir o call stack
         addi sp sp 4
-        #incrementar o endereço dos pontos para passar ao seguinte
+        #incrementar o endereÃ§o dos pontos para passar ao seguinte
         addi t1 t1 8
-        #incrementar o endereço do vetor clusters para passar ao seguinte
+        #incrementar o endereÃ§o do vetor clusters para passar ao seguinte
         addi t3 t3 4
-        #decrementar o número de pontos que falta verificar
+        #decrementar o nÃºmero de pontos que falta verificar
         addi t0 t0 -1
         j printClusters_loop_beg
     printClusters_loop_end:
@@ -324,7 +324,7 @@ mainSingleCluster:
     jr ra
 ### PseudoRandomNumberGen
 # Argumentos: nenhum
-# Retorno: a0 número
+# Retorno: a0 nÃºmero
 PseudoRandomNumberGen:
     li a7 31
     ecall
@@ -345,7 +345,7 @@ PseudoRandomNumberGen:
 ### initializeCentroids
 #Este procedimento incializa os valores inciais do vetor centroides. 
 #Cada um dos k centroids deve ser colocado num par de coordenadas
-#escolhido de forma pseudo-aleatória
+#escolhido de forma pseudo-aleatÃ³ria
 # Argumentos: nenhum
 # Retorno: nenhum
 initializeCentroids:
@@ -400,35 +400,86 @@ manhattanDistance:
 # a0: cluster index
 
 nearestCluster:
-    lw a5, k
-    addi a5, a5, -1 
-    la t0, centroids
-    li t1, 0 #indice do centroid atual
-    li t3, 0 #indice do centroid a retornar
-    addi t2, a0, 0 #preservar o valor do a0, uma vez que a funcao manhattanDistance returna a distancia em a0
-    li a6, 200 #menor distancia
-    addi sp, sp , -4
+    addi sp, sp , -32
     sw ra, 0(sp)
+    sw s0 4(sp) 
+    sw s1 8(sp)
+    sw s2 12(sp)
+    sw s3 16(sp)
+    sw s4 20(sp)
+    sw s5 24(sp)
+    sw s6 28(sp)
+    lw s0, k
+    la s1, centroids
+    li s2, 0 #indice do centroid atual
+    li s3, 0 #indice do centroid a retornar
+    mv s4, a0 #preservar o valor do a0, uma vez que a funcao manhattanDistance returna a distancia em a0
+    mv s5, a1
+    li s6, 200 #menor distancia
+    
     nearestCluster_loop:
-        beq a5, t1, nearestCluster_loop_end
-        lw a2, 0(t0) #carregar a cordenada x do centroid
-        lw a3, 4(t0) #carregar a cordenada y do centroid
+        beq s2, s0, nearestCluster_loop_end
+        lw a2, 0(s1) #carregar a cordenada x do centroid
+        lw a3, 4(s1) #carregar a cordenada y do centroid
         jal manhattanDistance
         mv t4, a0 #mover a distancia para t4
-        mv a0, t2 #restaurar o a0
-        addi t0, t0, 8 #andar para a frente no vetor centroids
-        bgt a6, t4, nearestCluster_swapCluster #verifica se e necessario trocar o indice do cluster
-        addi t1, t1, 1 #incrementar o indice do cluster atual
+        mv a0, s4 #restaurar o a0
+        mv a1, s5
+        addi s1, s1, 8 #andar para a frente no vetor centroids
+        bgt s6, t4, nearestCluster_swapCluster #verifica se e necessario trocar o indice do cluster
+        addi s2, s2, 1 #incrementar o indice do cluster atual
         j nearestCluster_loop
     nearestCluster_swapCluster:
-        mv a6, t4 #troca a menor distancia
-        mv t3, t1 #troca o indice do cluster a retornar
-        addi t1, t1, 1 #incrementar o indice do cluster atual
+        mv s6, t4 #troca a menor distancia
+        mv s3, s2 #troca o indice do cluster a retornar
+        addi s2, s2, 1 #incrementar o indice do cluster atual
         j nearestCluster_loop
     nearestCluster_loop_end:
+        mv a0, s3 
         lw ra, 0(sp)
-        addi sp, sp, 4 #retornar o callstack
-        mv a0, t3          
+        lw s0 4(sp)
+        lw s1 8(sp)
+        lw s2 12(sp)
+        lw s3 16(sp)
+        lw s4 20(sp)
+        lw s5 24(sp)
+        lw s6 28(sp)
+        addi sp, sp, 32 #retornar o callstack
+                 
+    jr ra
+
+### setClusters
+# Pega no vetor de pontos e associa ao cluster correspondente
+# Argumentos: 
+# None
+# Retorno:
+# None
+
+setClusters:
+    addi sp sp -16
+    sw ra 0(sp)
+    sw s0 4(sp)
+    sw s1 8(sp)
+    sw s2 12(sp)
+    lw s0 n_points
+    la s1 points
+    la s2 clusters
+    setClusters_loop:
+        lw a0 0(s1)
+        lw a1 4(s1)
+        jal nearestCluster
+        sw a0 0(s2)
+        addi s0 s0 -1
+        addi s2 s2 4
+        addi s1 s1 8
+        beq x0 s0 setClusters_loop_end
+        j setClusters_loop
+    setClusters_loop_end:
+    lw ra 0(sp)
+    lw s0 4(sp)
+    lw s1 8(sp)
+    lw s2 12(sp)
+    addi sp sp 16
     jr ra
 
 
@@ -445,4 +496,9 @@ mainKMeans:
     jal initializeCentroids
     jal printCentroids
     jal printClusters
+    
+    jal setClusters
+    
+    jal printClusters
+    jal printCentroids
     jr ra
