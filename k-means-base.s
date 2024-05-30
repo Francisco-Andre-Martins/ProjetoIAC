@@ -230,8 +230,10 @@ printCentroids:
 
 calculateCentroids:
     # POR IMPLEMENTAR (2a parte)
+    addi sp, sp, -4
+    sw s0, 0(sp)
     lw a4, k
-    li t4, 1
+    li t4, 1 #constante para verificar se o número de centroides é 1
     li a1, 0 #numero de centroids calculados
     lw t0, n_points 
     la t1, points
@@ -241,8 +243,7 @@ calculateCentroids:
     lw t2, n_points #Utilizamos duas vezes n_points, uma para percorrer o vetor e a segunda para calcular a media
     addi t5, x0 0 #coordenada x do unico centroid
     addi t6, x0 0 #coordenada y do unico centroid
-    addi sp, sp, -4
-    sw s0, 0(sp)
+    
     calculateCentroids_loop: #percorre o vetor points de modo a calcular o centroid
         beq t0, x0, calculateCentroids_loop_end #verificar se chegamos ao final do vetor
         lw a0, 0(t1)
