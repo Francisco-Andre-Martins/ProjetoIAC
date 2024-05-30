@@ -1,8 +1,8 @@
 #
 # IAC 2023/2024 k-means
-# 
-# Grupo: Em_cima_do_Joelho
-# Campus:
+# teste
+# Grupo: 40
+# Campus: Alameda
 #
 # Autores:
 # 109493, Francisco Martins
@@ -33,28 +33,28 @@
 #points:     .word 4,2, 5,1, 5,2, 5,3 6,2
 
 #Input C
-#n_points:    .word 23
-#points: .word 0,0, 0,1, 0,2, 1,0, 1,1, 1,2, 1,3, 2,0, 2,1, 5,3, 6,2, 6,3, 6,4, 7,2, 7,3, 6,8, 6,9, 7,8, 8,7, 8,8, 8,9, 9,7, 9,8
+n_points:    .word 23
+points: .word 0,0, 0,1, 0,2, 1,0, 1,1, 1,2, 1,3, 2,0, 2,1, 5,3, 6,2, 6,3, 6,4, 7,2, 7,3, 6,8, 6,9, 7,8, 8,7, 8,8, 8,9, 9,7, 9,8
 
 #Input D
-n_points:    .word 30
-points:      .word 16, 1, 17, 2, 18, 6, 20, 3, 21, 1, 17, 4, 21, 7, 16, 4, 21, 6, 19, 6, 4, 24, 6, 24, 8, 23, 6, 26, 6, 26, 6, 23, 8, 25, 7, 26, 7, 20, 4, 21, 4, 10, 2, 10, 3, 11, 2, 12, 4, 13, 4, 9, 4, 9, 3, 8, 0, 10, 4, 10
+#n_points:    .word 30
+#points:      .word 16, 1, 17, 2, 18, 6, 20, 3, 21, 1, 17, 4, 21, 7, 16, 4, 21, 6, 19, 6, 4, 24, 6, 24, 8, 23, 6, 26, 6, 26, 6, 23, 8, 25, 7, 26, 7, 20, 4, 21, 4, 10, 2, 10, 3, 11, 2, 12, 4, 13, 4, 9, 4, 9, 3, 8, 0, 10, 4, 10
 
 
 
 # Valores de centroids e k a usar na 1a parte do projeto:
-centroids:   .word 0,0
-k:           .word 1
+#centroids:   .word 0,0
+#k:           .word 1
 
 # Valores de centroids, k e L a usar na 2a parte do prejeto:
-#centroids:   .word 0,0, 10,0, 0,10
-#k:           .word 3
-#L:           .word 10
+centroids:   .word 0,0, 10,0, 0,10
+k:           .word 3
+L:           .word 10
 
 # Abaixo devem ser declarados o vetor clusters (2a parte) e outras estruturas de dados
 # que o grupo considere necessarias para a solucao:
-#clusters:    
-#clusters: .zero 120
+#clusters: .word 1,2,0,1,2,1,2,0,1,2,1,2,1,2,1,2,1,2,1,2,1,0,0,0,0,0,0,0,0,1    
+clusters: .zero 120
 
 
 
@@ -71,10 +71,10 @@ colors:      .word 0xff0000, 0x00ff00, 0x0000ff  # Cores dos pontos do cluster 0
  
 .text
     # Chama funcao principal da 1a parte do projeto
-    jal mainSingleCluster
+    #jal mainSingleCluster
 
     # Descomentar na 2a parte do projeto:
-    #jal mainKMeans
+    jal mainKMeans
     
     #Termina o programa (chamando chamada sistema)
     li a7, 10
@@ -106,22 +106,21 @@ printPoint:
     
 
 ### cleanScreen
-# Limpa todos os pontos do ecrã
+# Limpa todos os pontos do ecra
 # Argumentos: nenhum
 # Retorno: nenhum
 
 cleanScreen:
-    # POR IMPLEMENTAR (1a parte)
     li t0 0
     li t1 0
     li t2 32
     addi sp sp -4
     sw ra 0(sp)
-    cleanScreen_loop_externo_beg: #no final de cada linha, volta a fazer a coluna
-        beq t1 t2 cleanScreen_loop_externo_end 
-        li t0 0
-        cleanScreen_loop_interno_beg: #percorre cada linha e coloca o ponto a branco
-            beq t0 t2 cleanScreen_loop_interno_end
+    cleanScreen_loop_externo_beg:
+       beq t1 t2 cleanScreen_loop_externo_end #no final de cada linha, volta a fazer a coluna
+       li t0 0
+        cleanScreen_loop_interno_beg:
+            beq t0 t2 cleanScreen_loop_interno_end #percorre cada linha e coloca o ponto a branco
             mv a0 t0
             mv a1 t1
             li a2 white
@@ -145,26 +144,40 @@ cleanScreen:
 # Retorno: nenhum
 
 printClusters:
-    # POR IMPLEMENTAR (1a e 2a parte)
-    lw t3 k
-    li t4 1
-    bne t3 t4 printClusters_bigif_beg #verifica se o k é igual a 1
-    #sendo igual a 1, então percorre o vetor de pontos e imprime-os no ecrã
+    # POR IMPLEMENTAR (2a parte)
+    addi sp sp -12
+    sw a0 0(sp)
+    sw a1 4(sp)
+    sw a2 8(sp)
+
     lw t0 n_points
     la t1 points
-    li a2 black
+    li t6 4
+    la t3 clusters
+    #t2 fica com a cor atual, refreshed em cada ciclo com o início do vetor cores
+    
     printClusters_loop_beg: #percorre o vetor de pontos e coloca-os no ecrã
-        beq t0 x0 printClusters_loop_end #verifica se se chegou ao final do vetor 
+        beq t0 x0 printClusters_loop_end #verifica se se chegou ao final do vetor
+        la t2 colors
         lw a0 0(t1)
         lw a1 4(t1)
+        lw t5 0(t3)
+        mul t5 t5 t6 #vejo que cluster é, e faço correspondência com a sua cor
+        add t2 t2 t5
+        lw a2 0(t2)
+        
         #tratar do call stack
         addi sp sp -4
-        sw ra 0(sp) 
+        sw ra 0(sp)
         jal printPoint
         lw ra 0(sp)
         #destruir o call stack
         addi sp sp 4
+        #incrementar o endereço dos pontos para passar ao seguinte
         addi t1 t1 8
+        #incrementar o endereço do vetor clusters para passar ao seguinte
+        addi t3 t3 4
+        #decrementar o número de pontos que falta verificar
         addi t0 t0 -1
         j printClusters_loop_beg
     printClusters_loop_end:
@@ -172,8 +185,11 @@ printClusters:
     printClusters_bigif_beg:
         
     printClusters_bigif_end:
+    lw a0 0(sp)
+    lw a1 4(sp)
+    lw a2 8(sp)
+    addi sp sp 12
     jr ra
-
 
 ### printCentroids
 # Pinta os centroides na LED matrix
@@ -182,7 +198,28 @@ printClusters:
 # Retorno: nenhum
 
 printCentroids:
-    # POR IMPLEMENTAR (1a e 2a parte)
+    # POR IMPLEMENTAR (2a parte)
+    li t0 0          
+    li t1 8         
+    #li t2 0          # Inicializar o vetor
+    la t3 centroids  
+    lw t4 k          
+    li a2 black     
+    
+    printCentroids_loop:
+        mul t6 t0 t1    # Deslocamento centroide 
+        add t6 t6 t3    
+
+        lw a0 0(t6)      #coordenada x 
+        lw a1 4(t6)      # coordenada y 
+        addi sp sp -4
+        sw ra 0(sp)
+        jal printPoint
+        lw ra 0(sp)
+        addi sp sp 4
+        
+        addi t0 t0 1    # proximo centroide
+        bne t0 t4 printCentroids_loop
     jr ra
     
 
@@ -192,16 +229,18 @@ printCentroids:
 # Retorno: nenhum
 
 calculateCentroids:
-    # POR IMPLEMENTAR (1a e 2a parte)
-    lw t3, k
+    # POR IMPLEMENTAR (2a parte)
+    lw a4, k
     li t4, 1
-    lw t0, n_points #Utilizamos duas vezes n_points, uma para percorrer o vetor e a segunda para calcular a media
-    lw t2, n_points
-    lw t1, points
-    lw t3, centroids
-    bne t3, t4, calculateCentroids_bigif_bge #verifica se k=1, se este for o caso basta percorrer o vetor points
-    lw t5, x0 #coordenada x do unico centroid
-    lw t6, x0 #coordenada y do unico centroid
+    li a1, 0 #numero de centroids calculados
+    lw t0, n_points 
+    la t1, points
+    la t3, centroids
+    la a0, clusters 
+    bne a4, t4, calculateCentroids_bigif_innit #verifica se k=1, se este for o caso basta percorrer o vetor points
+    lw t2, n_points #Utilizamos duas vezes n_points, uma para percorrer o vetor e a segunda para calcular a media
+    addi t5, x0 0 #coordenada x do unico centroid
+    addi t6, x0 0 #coordenada y do unico centroid
     calculateCentroids_loop: #percorre o vetor points de modo a calcular o centroid
         beq t0, x0, calculateCentroids_loop_end #verificar se chegamos ao final do vetor
         lw a0, 0(t1)
@@ -211,17 +250,40 @@ calculateCentroids:
         addi t1, t1, 8 #andar para a frente no vetor points
         addi t0, t0, -1 #reduzir o numero de elementos restantes
         j calculateCentroids_loop
+    calculateCentroids_bigif_innit:
+        li a5, 0 #posicao no vetor cluster e points
+        li t2, 0 #numero de pontos de um cluster
+        li t5, 0 #coodernada x do centroid de um cluster
+        li t6, 0 #coodernada y do centroid de um cluster
+    calculateCentroids_bigif_loop:
+        beq t0, x0, calculateCentroids_loop_end
+        lw t4, a5(a0) #Carregar o cluster do ponto a verificar
+        beq a1, t4, calculateCentroids_bigif_addPoint #Se o ponto for do cluster a verificar, adicionamos ao centroid
+        addi a5, a5, 4 #Andar para a frente no vetor clusters
+        addi t0, t0 ,-1 #diminuir o numero de pontos que temos de verificar
+        j calculateCentroids_bigif_loop
+    calculateCentroids_bigif_addPoint:
+        slli a5, a5, 1 #multiplicar o indice do vetor cluster por dois de modo a obter o indice do ponto
+        lw a6, a5(t1) #obter a coordenada x do ponto
+        addi a5, a5, 4 #com esta soma tambem andamos para a frente no vetor clusters
+        lw a7, a5(t2) #obter a coordenada y do ponto
+        srli a5, a5, 1 #dividir o indice do vetor cluster por 2
+        add t5, t5, a6
+        add t6, t6, a7
+        addi t2, t2, 1 #aumentar o numero de pontos pertencentes ao cluster
+        addi t0, t0 ,-1 #diminuir o numero de pontos que temos de verificar
+        j calculateCentroids_bigif_loop
     calculateCentroids_loop_end:
         div t5, t5, t2 #fazer a media para descobrir as coordenadas do centroid
         div t6, t6, t2
         sw t5, 0(t3) #guardar as coordenadas do centroid no vetor centroids
         sw t6, 4(t3)
-    calculateCentroids_bigif_bge:
-        #Por implementar
-    calculateCentroids_bigif_end:
-        #Por implementar
-    jr ra
-
+        addi a1, a1 ,1 #adicionamos 1 ao numero de centroids calculados
+        beq a1, a4, calculateCentroids_end #Se ja tivermos calculado todos os centroids, a funcao acaba
+        addi t3, t3, 8 #andamos para a frente no vetor centroids
+        j calculateCentroids_bigif_innit
+    calculateCentroids_end:
+        jr ra
 
 ### mainSingleCluster
 # Funcao principal da 1a parte do projeto.
@@ -229,29 +291,80 @@ calculateCentroids:
 # Retorno: nenhum
 
 mainSingleCluster:
-    # temp code
-    jal cleanScreen
-    jal printClusters
+    
     #1. Coloca k=1 (caso nao esteja a 1)
-    # POR IMPLEMENTAR (1a parte)
-
+    lw t1 k
+    li t2 1
+    bne t1 t2 mainSingleCuster_bigif_bge
+    
     #2. cleanScreen
-    # POR IMPLEMENTAR (1a parte)
-
+    jal cleanScreen
+    
     #3. printClusters
-    # POR IMPLEMENTAR (1a parte)
-
+    jal printClusters
+    
     #4. calculateCentroids
-    # POR IMPLEMENTAR (1a parte)
-
+    jal calculateCentroids
+    
     #5. printCentroids
-    # POR IMPLEMENTAR (1a parte)
-
+    jal printCentroids
+    
     #6. Termina
+    mainSingleCuster_bigif_bge:
+        #por implementar
+    addi sp sp -4
+    sw ra 0(sp)
+    lw ra 0(sp)
+    addi sp sp 4    
     jr ra
-
-
-
+### PseudoRandomNumberGen
+# Argumentos: nenhum
+# Retorno: a0 número
+PseudoRandomNumberGen:
+    li a7 31
+    ecall
+    mv t1 a0
+    li a7 30
+    ecall
+    mv t2 a0
+    li t3 32
+    rem t1 t1 t3
+    rem t2 t2 t3
+    add t2 t1 t2
+    rem t2 t2 t3
+    bge t2 x0 PseudoRandomNumberGen_end_1stif
+    sub t2 x0 t2
+    PseudoRandomNumberGen_end_1stif:
+        mv a0 t2
+    jr ra
+### initializeCentroids
+#Este procedimento incializa os valores inciais do vetor centroides. 
+#Cada um dos k centroids deve ser colocado num par de coordenadas
+#escolhido de forma pseudo-aleatória
+# Argumentos: nenhum
+# Retorno: nenhum
+initializeCentroids:
+    lw t0 k
+    la t6 centroids
+    addi sp sp -4
+    sw ra 0(sp)
+    initializeCentroids_loop:
+        jal PseudoRandomNumberGen
+        mv t4 a0
+        jal PseudoRandomNumberGen
+        mv t5 a0
+        sw t4 0(t6)
+        sw t5 4(t6)
+        addi t6 t6 8
+        addi t0 t0 -1
+        beq t0 x0 initializeCentroids_endloop
+        j initializeCentroids_loop
+    initializeCentroids_endloop:
+    lw ra 0(sp)
+    addi sp sp 4
+    
+    jr ra
+    
 ### manhattanDistance
 # Calcula a distancia de Manhattan entre (x0,y0) e (x1,y1)
 # Argumentos:
@@ -262,6 +375,15 @@ mainSingleCluster:
 
 manhattanDistance:
     # POR IMPLEMENTAR (2a parte)
+    sub a0 a0 a2
+    bge a0 x0 manhattanDistance_end_1stif
+    sub a0 x0 a0
+    manhattanDistance_end_1stif:
+    sub a1 a1 a3
+    bge a1 x0 manhattanDistance_end_2ndtif
+    sub a1 x0 a1
+    manhattanDistance_end_2ndtif:
+    add a0 a0 a1
     jr ra
 
 
@@ -273,7 +395,34 @@ manhattanDistance:
 # a0: cluster index
 
 nearestCluster:
-    # POR IMPLEMENTAR (2a parte)
+    lw a5, k
+    la t0, centroids
+    lw t1, x0 #indice do centroid atual
+    lw t3, x0 #indice do centroid cujo ponto tem menor distancia
+    addi t2, a0, x0 #preservar o valor do a0, uma vez que a funcao manhattanDistance returna a distancia em a0
+    li a6, 200 #menor distancia
+    nearestCluster_loop:
+        beq a5, x0, nearestCluster_loop_end
+        lw a2, 0(t0) #carregar a cordenada x do centroid
+        lw a3, 4(t0) #carregar a cordenada y do centroid
+        addi sp, sp, -4 #tratar do callstack
+        sw ra, 0(sp)
+        jal manhattanDistance
+        addi sp, sp, 4 #retornar o callstack
+        mv t4, a0 #mover a distancia para t4
+        mv a0, t2 #restaurar o a0
+        addi a5, a5, -1 #diminuir o numero de centroids restantes
+        addi t0, t0, 8 #andar para a frente no vetor centroids
+        bgt a6, t4, nearestCluster_swapCluster #verifica se e necessario trocar o indice do cluster
+        addi t1, t1, 1 #incrementar o indice do cluster atual
+        j nearestCluster_loop
+    nearestCluster_swapCluster:
+        mv a6, t4 #troca a menor distancia
+        mv t3, t1 #troca o indice do cluster a retornar
+        addi t1, t1, 1 #incrementar o indice do cluster atual
+        j nearestCluster_loop
+    nearestCluster_loop_end:
+        mv a0, t3          
     jr ra
 
 
@@ -281,7 +430,13 @@ nearestCluster:
 # Executa o algoritmo *k-means*.
 # Argumentos: nenhum
 # Retorno: nenhum
+    
 
 mainKMeans:  
     # POR IMPLEMENTAR (2a parte)
+    jal cleanScreen
+    
+    jal initializeCentroids
+    jal printCentroids
+    jal printClusters
     jr ra
