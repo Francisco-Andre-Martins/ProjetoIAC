@@ -241,6 +241,8 @@ calculateCentroids:
     lw t2, n_points #Utilizamos duas vezes n_points, uma para percorrer o vetor e a segunda para calcular a media
     addi t5, x0 0 #coordenada x do unico centroid
     addi t6, x0 0 #coordenada y do unico centroid
+    addi sp, sp, -4
+    sw s0, 0(sp)
     calculateCentroids_loop: #percorre o vetor points de modo a calcular o centroid
         beq t0, x0, calculateCentroids_loop_end #verificar se chegamos ao final do vetor
         lw a0, 0(t1)
@@ -251,26 +253,27 @@ calculateCentroids:
         addi t0, t0, -1 #reduzir o numero de elementos restantes
         j calculateCentroids_loop
     calculateCentroids_bigif_innit:
-        li a5, 0 #posicao no vetor cluster e points
+        li s0, 0 #posicao no vetor points
+        li a5, 0 #posicao no vetor cluster
         li t2, 0 #numero de pontos de um cluster
         li t5, 0 #coodernada x do centroid de um cluster
         li t6, 0 #coodernada y do centroid de um cluster
     calculateCentroids_bigif_loop:
         beq t0, x0, calculateCentroids_loop_end
-        lw t4, a5(a0) #Carregar o cluster do ponto a verificar
+        lw t4, 0(a0) #Carregar o cluster do ponto a verificar
         beq a1, t4, calculateCentroids_bigif_addPoint #Se o ponto for do cluster a verificar, adicionamos ao centroid
-        addi a5, a5, 4 #Andar para a frente no vetor clusters
+        addi a0, a0, 4 #Andar para a frente no vetor clusters
+        addi t1 ,t1, 8 #Andar para a frente no vetor points
         addi t0, t0 ,-1 #diminuir o numero de pontos que temos de verificar
         j calculateCentroids_bigif_loop
     calculateCentroids_bigif_addPoint:
-        slli a5, a5, 1 #multiplicar o indice do vetor cluster por dois de modo a obter o indice do ponto
-        lw a6, a5(t1) #obter a coordenada x do ponto
-        addi a5, a5, 4 #com esta soma tambem andamos para a frente no vetor clusters
-        lw a7, a5(t2) #obter a coordenada y do ponto
-        srli a5, a5, 1 #dividir o indice do vetor cluster por 2
+        lw a6, 0(t1) #obter a coordenada x do ponto
+        lw a7, 4(t1) #obter a coordenada y do ponto
         add t5, t5, a6
         add t6, t6, a7
         addi t2, t2, 1 #aumentar o numero de pontos pertencentes ao cluster
+        addi a0, a0, 4 #Andar para a frente no vetor clusters
+        addi t1 ,t1, 8 #Andar para a frente no vetor points
         addi t0, t0 ,-1 #diminuir o numero de pontos que temos de verificar
         j calculateCentroids_bigif_loop
     calculateCentroids_loop_end:
@@ -283,7 +286,9 @@ calculateCentroids:
         addi t3, t3, 8 #andamos para a frente no vetor centroids
         j calculateCentroids_bigif_innit
     calculateCentroids_end:
-        jr ra
+        lw s0, 0(sp)
+        addi sp, sp, 4
+    jr ra
 
 ### mainSingleCluster
 # Funcao principal da 1a parte do projeto.
@@ -396,21 +401,19 @@ manhattanDistance:
 
 nearestCluster:
     lw a5, k
-    addi a5, a5, -1
+    addi a5, a5, -1 
     la t0, centroids
-    lw t1, x0 #indice do centroid atual
-    lw t3, x0 #indice do centroid a retornar
-    addi t2, a0, x0 #preservar o valor do a0, uma vez que a funcao manhattanDistance returna a distancia em a0
+    li t1, 0 #indice do centroid atual
+    li t3, 0 #indice do centroid a retornar
+    addi t2, a0, 0 #preservar o valor do a0, uma vez que a funcao manhattanDistance returna a distancia em a0
     li a6, 200 #menor distancia
+    addi sp, sp , -4
+    sw ra, 0(sp)
     nearestCluster_loop:
         beq a5, t1, nearestCluster_loop_end
         lw a2, 0(t0) #carregar a cordenada x do centroid
         lw a3, 4(t0) #carregar a cordenada y do centroid
-        addi sp, sp, -4 #tratar do callstack
-        sw ra, 0(sp)
         jal manhattanDistance
-        lw ra, 0(sp)
-        addi sp, sp, 4 #retornar o callstack
         mv t4, a0 #mover a distancia para t4
         mv a0, t2 #restaurar o a0
         addi t0, t0, 8 #andar para a frente no vetor centroids
@@ -423,6 +426,8 @@ nearestCluster:
         addi t1, t1, 1 #incrementar o indice do cluster atual
         j nearestCluster_loop
     nearestCluster_loop_end:
+        lw ra, 0(sp)
+        addi sp, sp, 4 #retornar o callstack
         mv a0, t3          
     jr ra
 
