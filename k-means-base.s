@@ -396,22 +396,23 @@ manhattanDistance:
 
 nearestCluster:
     lw a5, k
+    addi a5, a5, -1
     la t0, centroids
     lw t1, x0 #indice do centroid atual
-    lw t3, x0 #indice do centroid cujo ponto tem menor distancia
+    lw t3, x0 #indice do centroid a retornar
     addi t2, a0, x0 #preservar o valor do a0, uma vez que a funcao manhattanDistance returna a distancia em a0
     li a6, 200 #menor distancia
     nearestCluster_loop:
-        beq a5, x0, nearestCluster_loop_end
+        beq a5, t1, nearestCluster_loop_end
         lw a2, 0(t0) #carregar a cordenada x do centroid
         lw a3, 4(t0) #carregar a cordenada y do centroid
         addi sp, sp, -4 #tratar do callstack
         sw ra, 0(sp)
         jal manhattanDistance
+        lw ra, 0(sp)
         addi sp, sp, 4 #retornar o callstack
         mv t4, a0 #mover a distancia para t4
         mv a0, t2 #restaurar o a0
-        addi a5, a5, -1 #diminuir o numero de centroids restantes
         addi t0, t0, 8 #andar para a frente no vetor centroids
         bgt a6, t4, nearestCluster_swapCluster #verifica se e necessario trocar o indice do cluster
         addi t1, t1, 1 #incrementar o indice do cluster atual
