@@ -7,7 +7,7 @@
 # Autores:
 # 109493, Francisco Martins
 # 110425, Margarida Paiva
-# 109617, Hern�ni Mour�o
+# 109617, Hernani Mourao
 #
 # Tecnico/ULisboa
 
