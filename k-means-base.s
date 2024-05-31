@@ -498,9 +498,8 @@ setClusters:
 # Retorno: nenhum
     
 
-mainKMeans:  
-    # POR IMPLEMENTAR (2a parte)
-    addi sp, sp, -20
+mainKMeans: 
+    addi sp, sp, -20 #tratar do callstack
     sw ra, 0(sp)
     sw s0, 4(sp)
     sw s1, 8(sp)
@@ -511,7 +510,7 @@ mainKMeans:
     mainKmeans_loop:
         lw s0, centroids #vetor centroids da ultima iteracao
         lw s3, k #iteracoes do inner loop
-        beq s2, x0, mainKmeans_loop_end
+        beq s2, x0, mainKmeans_loop_end #caso em que ocorrem o maximo de iteracoes
         jal cleanScreen
         jal setClusters
         jal calculateCentroids
@@ -528,7 +527,7 @@ mainKMeans:
             bne t3, t5 mainKmeans_loop
             addi s0, s0, 8 #andar para a frente no vetor centroids
             addi s1, s1, 8
-            beq s3,x0, mainKmeans_loop_end
+            beq s3,x0, mainKmeans_loop_end #caso em que as coordenadas dos centroids nao se alteram entre iteracoes
             addi s3, s3, -1 #diminuir o numero de iteracoes restantes
     mainKmeans_loop_end:
         lw ra, 0(sp)
@@ -536,5 +535,5 @@ mainKMeans:
         lw s1, 8(sp)
         lw s2, 12(sp)
         lw s3, 16(sp)
-        addi sp, sp, 20
+        addi sp, sp, 20 #retornar  o callstack
     jr ra
