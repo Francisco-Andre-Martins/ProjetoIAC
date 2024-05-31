@@ -229,65 +229,71 @@ printCentroids:
 # Retorno: nenhum
 
 calculateCentroids:
-    # POR IMPLEMENTAR (2a parte)
-    lw a4, k
-    li t4, 1
-    li a1, 0 #numero de centroids calculados
-    lw t0, n_points 
-    la t1, points
-    la t3, centroids
-    la a0, clusters 
-    bne a4, t4, calculateCentroids_bigif_innit #verifica se k=1, se este for o caso basta percorrer o vetor points
-    lw t2, n_points #Utilizamos duas vezes n_points, uma para percorrer o vetor e a segunda para calcular a media
-    addi t5, x0 0 #coordenada x do unico centroid
-    addi t6, x0 0 #coordenada y do unico centroid
-    addi sp, sp, -4
-    sw s0, 0(sp)
-    calculateCentroids_loop: #percorre o vetor points de modo a calcular o centroid
-        beq t0, x0, calculateCentroids_loop_end #verificar se chegamos ao final do vetor
-        lw a0, 0(t1)
-        lw a1, 4(t1)
-        add t5, t5, a0
-        add t6, t6, a1
-        addi t1, t1, 8 #andar para a frente no vetor points
-        addi t0, t0, -1 #reduzir o numero de elementos restantes
-        j calculateCentroids_loop
-    calculateCentroids_bigif_innit:
-        li s0, 0 #posicao no vetor points
-        li a5, 0 #posicao no vetor cluster
-        li t2, 0 #numero de pontos de um cluster
-        li t5, 0 #coodernada x do centroid de um cluster
-        li t6, 0 #coodernada y do centroid de um cluster
-    calculateCentroids_bigif_loop:
-        beq t0, x0, calculateCentroids_loop_end
-        lw t4, 0(a0) #Carregar o cluster do ponto a verificar
-        beq a1, t4, calculateCentroids_bigif_addPoint #Se o ponto for do cluster a verificar, adicionamos ao centroid
-        addi a0, a0, 4 #Andar para a frente no vetor clusters
-        addi t1 ,t1, 8 #Andar para a frente no vetor points
-        addi t0, t0 ,-1 #diminuir o numero de pontos que temos de verificar
-        j calculateCentroids_bigif_loop
-    calculateCentroids_bigif_addPoint:
-        lw a6, 0(t1) #obter a coordenada x do ponto
-        lw a7, 4(t1) #obter a coordenada y do ponto
-        add t5, t5, a6
-        add t6, t6, a7
-        addi t2, t2, 1 #aumentar o numero de pontos pertencentes ao cluster
-        addi a0, a0, 4 #Andar para a frente no vetor clusters
-        addi t1 ,t1, 8 #Andar para a frente no vetor points
-        addi t0, t0 ,-1 #diminuir o numero de pontos que temos de verificar
-        j calculateCentroids_bigif_loop
-    calculateCentroids_loop_end:
-        div t5, t5, t2 #fazer a media para descobrir as coordenadas do centroid
-        div t6, t6, t2
-        sw t5, 0(t3) #guardar as coordenadas do centroid no vetor centroids
-        sw t6, 4(t3)
-        addi a1, a1 ,1 #adicionamos 1 ao numero de centroids calculados
-        beq a1, a4, calculateCentroids_end #Se ja tivermos calculado todos os centroids, a funcao acaba
-        addi t3, t3, 8 #andamos para a frente no vetor centroids
-        j calculateCentroids_bigif_innit
-    calculateCentroids_end:
-        lw s0, 0(sp)
-        addi sp, sp, 4
+    addi sp sp -32
+    sw ra 0(sp)
+    sw s0 4(sp)
+    sw s1 8(sp)
+    sw s2 12(sp)
+    sw s3 16(sp)
+    sw s4 20(sp)
+    sw s5 24(sp)
+    sw s6 28(sp)
+    
+    lw s0 k
+    #addi s0 s0 -1
+    lw s1 n_points
+    la s2 points
+    la s3 centroids
+    la s4 clusters
+    li s5 0 #número de centroids percorrido
+    li s6 0 #número de pontos a considerar para a média
+    
+    #t0 tem a média de x
+    #t1 tem a média de y
+    #t2 tem x do ponto atual
+    #t3 tem o y do ponto atual
+    #t4 tem o cluster do ponto atual
+    calculateCentroids_outer_loop:
+        beq s0 s5 calculateCentroids_outer_loop_end
+        lw s1 n_points
+        la s2 points
+        la s4 clusters
+        calculateCentroids_inner_loop:
+            beq s1 x0 calculateCentroids_inner_loop_end
+            lw t4 0(s4)
+            beq t4 s5 calculateCentroids_if_point_in_centroid
+            addi s4 s4 4
+            addi s2 s2 8
+            addi s1 s1 -1
+            j calculateCentroids_inner_loop
+        calculateCentroids_if_point_in_centroid:
+            lw t2 0(s2)
+            lw t3 4(s2)
+            add t0 t0 t2
+            add t1 t1 t3
+            addi s4 s4 4
+            addi s6 s6 1
+            addi s2 s2 8
+            addi s1 s1 -1
+            j calculateCentroids_inner_loop
+        calculateCentroids_inner_loop_end:
+        div t0 t0 s6
+        div t1 t1 s6
+        sw t0 0(s3)
+        sw t1 4(s3)
+        addi s3 s3 8 
+        addi s5 s5 1
+        j calculateCentroids_outer_loop
+    calculateCentroids_outer_loop_end:
+    lw ra 0(sp)
+    lw s0 4(sp)
+    lw s1 8(sp)
+    lw s2 12(sp)
+    lw s3 16(sp)
+    lw s4 20(sp)
+    lw s5 24(sp)
+    lw s6 28(sp)
+    addi sp sp 32
     jr ra
 
 ### mainSingleCluster
@@ -435,6 +441,7 @@ nearestCluster:
         addi s2, s2, 1 #incrementar o indice do cluster atual
         j nearestCluster_loop
     nearestCluster_loop_end:
+        mv a0, s3 
         lw ra, 0(sp)
         lw s0 4(sp)
         lw s1 8(sp)
@@ -444,7 +451,7 @@ nearestCluster:
         lw s5 24(sp)
         lw s6 28(sp)
         addi sp, sp, 32 #retornar o callstack
-        mv a0, s3          
+                 
     jr ra
 
 ### setClusters
@@ -497,7 +504,8 @@ mainKMeans:
     jal printClusters
     
     jal setClusters
-    
+    jal calculateCentroids
+    jal cleanScreen
     jal printClusters
     jal printCentroids
     jr ra
