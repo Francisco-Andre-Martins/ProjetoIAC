@@ -33,12 +33,12 @@
 #points:     .word 4,2, 5,1, 5,2, 5,3 6,2
 
 #Input C
-n_points:    .word 23
-points: .word 0,0, 0,1, 0,2, 1,0, 1,1, 1,2, 1,3, 2,0, 2,1, 5,3, 6,2, 6,3, 6,4, 7,2, 7,3, 6,8, 6,9, 7,8, 8,7, 8,8, 8,9, 9,7, 9,8
+#n_points:    .word 23
+#points: .word 0,0, 0,1, 0,2, 1,0, 1,1, 1,2, 1,3, 2,0, 2,1, 5,3, 6,2, 6,3, 6,4, 7,2, 7,3, 6,8, 6,9, 7,8, 8,7, 8,8, 8,9, 9,7, 9,8
 
 #Input D
-#n_points:    .word 30
-#points:      .word 16, 1, 17, 2, 18, 6, 20, 3, 21, 1, 17, 4, 21, 7, 16, 4, 21, 6, 19, 6, 4, 24, 6, 24, 8, 23, 6, 26, 6, 26, 6, 23, 8, 25, 7, 26, 7, 20, 4, 21, 4, 10, 2, 10, 3, 11, 2, 12, 4, 13, 4, 9, 4, 9, 3, 8, 0, 10, 4, 10
+n_points:    .word 30
+points:      .word 16, 1, 17, 2, 18, 6, 20, 3, 21, 1, 17, 4, 21, 7, 16, 4, 21, 6, 19, 6, 4, 24, 6, 24, 8, 23, 6, 26, 6, 26, 6, 23, 8, 25, 7, 26, 7, 20, 4, 21, 4, 10, 2, 10, 3, 11, 2, 12, 4, 13, 4, 9, 4, 9, 3, 8, 0, 10, 4, 10
 
 
 
@@ -110,32 +110,33 @@ printPoint:
 # Argumentos: nenhum
 # Retorno: nenhum
 
-cleanScreen:
-    li t0 0
-    li t1 0
-    li t2 32
-    addi sp sp -4
+cleanScreen: 
+    #devido ao facto de que conhecemos o código do printPoint, não temos medo de usar registos temp
+    li t0 0 #contador de coluna
+    li t1 0 #contador de linha
+    li t2 32 # fica com o imediato do tamanho do ecrã
+    addi sp sp -4 #tratar do call stack para a chamada do print point
     sw ra 0(sp)
     cleanScreen_loop_externo_beg:
        beq t1 t2 cleanScreen_loop_externo_end #no final de cada linha, volta a fazer a coluna
-       li t0 0
+       li t0 0 #reiniciar a coluna
         cleanScreen_loop_interno_beg:
             beq t0 t2 cleanScreen_loop_interno_end #percorre cada linha e coloca o ponto a branco
-            mv a0 t0
+            mv a0 t0 #colocar as coordenadas do ponto no sítio adequado
             mv a1 t1
             li a2 white
             
             jal printPoint
             
-            addi t0 t0 1
+            addi t0 t0 1 # incrementar a coluna
             j cleanScreen_loop_interno_beg   
         cleanScreen_loop_interno_end:
-            addi t1 t1 1
+            addi t1 t1 1 #incrementar a linha
             j cleanScreen_loop_externo_beg
     cleanScreen_loop_externo_end:
-        lw ra 0(sp)
+        lw ra 0(sp) #colocar o call stack tal e qual como estava
         addi sp sp 4
-        jr ra
+        jr ra #retomar o controlo à função original
 
     
 ### printClusters
@@ -144,12 +145,13 @@ cleanScreen:
 # Retorno: nenhum
 
 printClusters:
-    # POR IMPLEMENTAR (2a parte)
-    addi sp sp -12
+    #call stack para garantir que tudo o que é sistema fica guardado
+    addi sp sp -16
     sw a0 0(sp)
     sw a1 4(sp)
     sw a2 8(sp)
-
+    sw ra 12(sp)
+    # mais uma vez, devido ao conhecimento do funcionamento interno do print point, não tenho medo de usar os registos temp
     lw t0 n_points
     la t1 points
     li t6 4
@@ -165,14 +167,7 @@ printClusters:
         mul t5 t5 t6 #vejo que cluster é, e faço correspondência com a sua cor
         add t2 t2 t5
         lw a2 0(t2)
-        
-        #tratar do call stack
-        addi sp sp -4
-        sw ra 0(sp)
         jal printPoint
-        lw ra 0(sp)
-        #destruir o call stack
-        addi sp sp 4
         #incrementar o endereço dos pontos para passar ao seguinte
         addi t1 t1 8
         #incrementar o endereço do vetor clusters para passar ao seguinte
@@ -181,14 +176,13 @@ printClusters:
         addi t0 t0 -1
         j printClusters_loop_beg
     printClusters_loop_end:
-        j printClusters_bigif_end
-    printClusters_bigif_beg:
         
-    printClusters_bigif_end:
+    #call stack again
     lw a0 0(sp)
     lw a1 4(sp)
     lw a2 8(sp)
-    addi sp sp 12
+    lw ra 12(sp)
+    addi sp sp 16
     jr ra
 
 ### printCentroids
@@ -198,10 +192,13 @@ printClusters:
 # Retorno: nenhum
 
 printCentroids:
-    # POR IMPLEMENTAR (2a parte)
-    li t0 0          
-    li t1 8         
-    #li t2 0          # Inicializar o vetor
+    # tratar do callstack
+    addi sp sp -4
+    sw ra 0(sp)
+    # mais uma vez, devido ao conhecimento do funcionamento interno do 
+    #print point, não tenho medo de usar os registos temp
+    li t0 0  #verifica quantos centroides foram percorridos        
+    li t1 8          
     la t3 centroids  
     lw t4 k          
     li a2 black     
@@ -212,14 +209,16 @@ printCentroids:
 
         lw a0 0(t6)      #coordenada x 
         lw a1 4(t6)      # coordenada y 
-        addi sp sp -4
-        sw ra 0(sp)
+        
         jal printPoint
-        lw ra 0(sp)
-        addi sp sp 4
+        
         
         addi t0 t0 1    # proximo centroide
-        bne t0 t4 printCentroids_loop
+        bne t0 t4 printCentroids_loop # verifica se todos os centroides foram percorridos
+        
+    
+    lw ra 0(sp)
+    addi sp sp 4
     jr ra
     
 
@@ -229,6 +228,7 @@ printCentroids:
 # Retorno: nenhum
 
 calculateCentroids:
+    #começar por tratar do callstack
     addi sp sp -32
     sw ra 0(sp)
     sw s0 4(sp)
@@ -254,22 +254,28 @@ calculateCentroids:
     #t3 tem o y do ponto atual
     #t4 tem o cluster do ponto atual
     calculateCentroids_outer_loop:
+    # o loop externo vai iterando pelos centroides
+        # verificar se todos os centroides já foram calculados
         beq s0 s5 calculateCentroids_outer_loop_end
+        #reiniciar as condições do loop interno
         lw s1 n_points
         la s2 points
         la s4 clusters
         li t0 0
         li t1 0
         li s6, 0
-        calculateCentroids_inner_loop:
+        calculateCentroids_inner_loop: #essencialmente faz o somatório das coordenadas dos pontos
             beq s1 x0 calculateCentroids_inner_loop_end
             lw t4 0(s4)
-            beq t4 s5 calculateCentroids_if_point_in_centroid
+            #verifica se um dado ponto está associado ao centroide a ser verificado
+            beq t4 s5 calculateCentroids_if_point_in_centroid 
             addi s4 s4 4
             addi s2 s2 8
             addi s1 s1 -1
             j calculateCentroids_inner_loop
         calculateCentroids_if_point_in_centroid:
+        # se estiver associado, acumula as coordenadas e aumenta o 
+        #número de pontos a ser considerado na média
             lw t2 0(s2)
             lw t3 4(s2)
             add t0 t0 t2
@@ -280,6 +286,7 @@ calculateCentroids:
             addi s1 s1 -1
             j calculateCentroids_inner_loop
         calculateCentroids_inner_loop_end:
+        # faz de facto a média e passa para o próximo centroide a verificar
         div t0 t0 s6
         div t1 t1 s6
         sw t0 0(s3)
@@ -288,6 +295,7 @@ calculateCentroids:
         addi s5 s5 1
         j calculateCentroids_outer_loop
     calculateCentroids_outer_loop_end:
+    #restaurar o estado inicial
     lw ra 0(sp)
     lw s0 4(sp)
     lw s1 8(sp)
@@ -331,49 +339,68 @@ mainSingleCluster:
     lw ra 0(sp)
     addi sp sp 4    
     jr ra
+    
 ### PseudoRandomNumberGen
 # Argumentos: nenhum
-# Retorno: a0 número
+# Retorno: a0 número entre 0 e 32
+
+# O modo como esta função está feita tem em conta diversas considerações práticas
+# 1, o número de ciclos entre cada iteração da função é constante, ficando sempre o mesmo valor inicial 
+# 2, usando epoch time do sistema, se o código for executado "instantaneamente" no simulador, 
+#     não há tempo suficiente para existir separação entre as coordenadas geradas, e
+#     todos os pontos começam no mesmo valor
+# Tendo isto em conta, são usados ambos os parâmetros para fazer a geração de coordenadas
 PseudoRandomNumberGen:
-    li a7 31
+    li a7 31 #faço a chamada ao sistema
     ecall
     mv t1 a0
     li a7 30
     ecall
     mv t2 a0
-    li t3 32
-    rem t1 t1 t3
-    rem t2 t2 t3
-    add t2 t1 t2
-    rem t2 t2 t3
+    li t3 32 
+    add t2 t1 t2 #somo as duas variáveis do sistema
+    rem t2 t2 t3 #faço o módulo 32 para ficar dentro da range de coordenadas possíveis
+    #verifica se o número é positivo
     bge t2 x0 PseudoRandomNumberGen_end_1stif
     sub t2 x0 t2
     PseudoRandomNumberGen_end_1stif:
         mv a0 t2
     jr ra
+
+
 ### initializeCentroids
 #Este procedimento incializa os valores inciais do vetor centroides. 
 #Cada um dos k centroids deve ser colocado num par de coordenadas
 #escolhido de forma pseudo-aleatória
 # Argumentos: nenhum
 # Retorno: nenhum
+
 initializeCentroids:
-    lw t0 k
-    la t6 centroids
+    #tratar do call stack
     addi sp sp -4
     sw ra 0(sp)
-    initializeCentroids_loop:
+    
+    lw t0 k #vai servir de iterador, de k a zero
+    la t6 centroids
+    
+    initializeCentroids_loop: 
+    #gero aleatoriamente cada uma das coordenadas para cada um dos centroides
         jal PseudoRandomNumberGen
         mv t4 a0
         jal PseudoRandomNumberGen
         mv t5 a0
+        # guardar as coordenadas aleatórias
         sw t4 0(t6)
         sw t5 4(t6)
+        #avançar no vetor centorides
         addi t6 t6 8
+        #decrementar o número de centroides a verificar
         addi t0 t0 -1
         beq t0 x0 initializeCentroids_endloop
         j initializeCentroids_loop
     initializeCentroids_endloop:
+    
+    #restaurar o stack ao estado inicial
     lw ra 0(sp)
     addi sp sp 4
     
@@ -388,16 +415,18 @@ initializeCentroids:
 # a0: distance
 
 manhattanDistance:
-    # POR IMPLEMENTAR (2a parte)
+    # faço a diferença entre as coordenadas x
     sub a0 a0 a2
-    bge a0 x0 manhattanDistance_end_1stif
-    sub a0 x0 a0
+    bge a0 x0 manhattanDistance_end_1stif #verifico o sinal da coordenada
+    sub a0 x0 a0 #faço o simétrico, se a coordenada fôr menor que zero
     manhattanDistance_end_1stif:
-    sub a1 a1 a3
+    sub a1 a1 a3 #a mesma coisa para y
     bge a1 x0 manhattanDistance_end_2ndtif
     sub a1 x0 a1
     manhattanDistance_end_2ndtif:
+    #somo as distâncias para fazer o retorno final
     add a0 a0 a1
+    #retomo o controlo à função que chamou
     jr ra
 
 
@@ -409,6 +438,7 @@ manhattanDistance:
 # a0: cluster index
 
 nearestCluster:
+    #tratar do callstack
     addi sp, sp , -32
     sw ra, 0(sp)
     sw s0 4(sp) 
@@ -445,6 +475,7 @@ nearestCluster:
         j nearestCluster_loop
     nearestCluster_loop_end:
         mv a0, s3 
+        #tratar do callstack
         lw ra, 0(sp)
         lw s0 4(sp)
         lw s1 8(sp)
@@ -453,8 +484,8 @@ nearestCluster:
         lw s4 20(sp)
         lw s5 24(sp)
         lw s6 28(sp)
-        addi sp, sp, 32 #retornar o callstack
-                 
+        addi sp, sp, 32
+    # retomar o controlo à função que chamou            
     jr ra
 
 ### setClusters
@@ -466,24 +497,33 @@ nearestCluster:
 
 setClusters:
     addi sp sp -16
+    #tratar do callstack
     sw ra 0(sp)
     sw s0 4(sp)
     sw s1 8(sp)
     sw s2 12(sp)
+    
+    #s0 serve de iterador, de n_points a 0
     lw s0 n_points
     la s1 points
     la s2 clusters
     setClusters_loop:
+        #carrego as coordenadas do ponto a verificar
         lw a0 0(s1)
         lw a1 4(s1)
+        #calculo o cluster mais próximo
         jal nearestCluster
+        #guardo o cluster mais próximo no vetor clusters
         sw a0 0(s2)
+        #decremento o iterador 
         addi s0 s0 -1
+        # passo para os próximos valores nos vetores
         addi s2 s2 4
         addi s1 s1 8
         beq x0 s0 setClusters_loop_end
         j setClusters_loop
     setClusters_loop_end:
+    #restauro a stack ao estado inicial
     lw ra 0(sp)
     lw s0 4(sp)
     lw s1 8(sp)
@@ -498,34 +538,42 @@ setClusters:
 # Retorno: nenhum
     
 
-mainKMeans:  
-    # POR IMPLEMENTAR (2a parte)
-    jal cleanScreen
+mainKMeans: 
+    addi sp, sp, -20 #tratar do callstack
+    sw ra, 0(sp)
+    sw s0, 4(sp)
+    sw s1, 8(sp)
+    sw s2, 12(sp)
+    sw s3, 16(sp)
+    lw s2, L #iteracoes do outer loop
     jal initializeCentroids
-    jal setClusters
-    jal printClusters
-    jal printCentroids
-    li s0, 10
-    loopteste:
-        beq s0,x0,fim
+    mainKmeans_loop:
+        lw s0, centroids #vetor centroids da ultima iteracao
+        lw s3, k #iteracoes do inner loop
+        beq s2, x0, mainKmeans_loop_end #caso em que ocorrem o maximo de iteracoes
         jal cleanScreen
-        jal calculateCentroids
         jal setClusters
+        jal calculateCentroids
+        lw s1, centroids #vetor centroids a seguir ao calculo dos centroids
         jal printClusters
         jal printCentroids
-        addi s0, s0, -1
-        j loopteste
-    fim:
-        miniloop:
-            j miniloop
-    #jal initializeCentroids
-    #jal printCentroids
-    #jal printClusters
- 
-    #jal setClusters
-    #jal calculateCentroids
-    #jal cleanScreen
-    #jal printClusters
-    #jal printCentroids
-    #la t0, centroids
+        addi s2, s2, -1 #diminuir o numero de iteracoes restantes
+        mainKmeans_inner_loop:
+            lw t2, 0(s0) #coordenada x da iteracao anterior
+            lw t3, 4(s0) #coordenada y da iteracao anterior
+            lw t4, 0(s1) #coordenada x da iteracao atual
+            lw t5, 4(s1) #coordenada y da iteracao atual
+            bne t2, t4, mainKmeans_loop #Se as coordenadas nao forem iguais voltamos a aplicar o algoritmo
+            bne t3, t5 mainKmeans_loop
+            addi s0, s0, 8 #andar para a frente no vetor centroids
+            addi s1, s1, 8
+            addi s3, s3, -1 #diminuir o numero de iteracoes restantes
+            beq s3,x0, mainKmeans_loop_end #caso em que as coordenadas dos centroids nao se alteram entre iteracoes
+    mainKmeans_loop_end:
+        lw ra, 0(sp)
+        lw s0, 4(sp)
+        lw s1, 8(sp)
+        lw s2, 12(sp)
+        lw s3, 16(sp)
+        addi sp, sp, 20 #retornar  o callstack
     jr ra
