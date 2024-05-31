@@ -7,7 +7,7 @@
 # Autores:
 # 109493, Francisco Martins
 # 110425, Margarida Paiva
-# 109617, Hernâni Mourão
+# 109617, Hern�ni Mour�o
 #
 # Tecnico/ULisboa
 
@@ -49,7 +49,7 @@ points:      .word 16, 1, 17, 2, 18, 6, 20, 3, 21, 1, 17, 4, 21, 7, 16, 4, 21, 6
 # Valores de centroids, k e L a usar na 2a parte do prejeto:
 centroids:   .word 0,0, 10,0, 0,10
 k:           .word 3
-L:           .word 10
+L:           .word 25
 
 # Abaixo devem ser declarados o vetor clusters (2a parte) e outras estruturas de dados
 # que o grupo considere necessarias para a solucao:
@@ -154,15 +154,15 @@ printClusters:
     la t1 points
     li t6 4
     la t3 clusters
-    #t2 fica com a cor atual, refreshed em cada ciclo com o início do vetor cores
+    #t2 fica com a cor atual, refreshed em cada ciclo com o in�cio do vetor cores
     
-    printClusters_loop_beg: #percorre o vetor de pontos e coloca-os no ecrã
+    printClusters_loop_beg: #percorre o vetor de pontos e coloca-os no ecr�
         beq t0 x0 printClusters_loop_end #verifica se se chegou ao final do vetor
         la t2 colors
         lw a0 0(t1)
         lw a1 4(t1)
         lw t5 0(t3)
-        mul t5 t5 t6 #vejo que cluster é, e faço correspondência com a sua cor
+        mul t5 t5 t6 #vejo que cluster �, e fa�o correspond�ncia com a sua cor
         add t2 t2 t5
         lw a2 0(t2)
         
@@ -173,11 +173,11 @@ printClusters:
         lw ra 0(sp)
         #destruir o call stack
         addi sp sp 4
-        #incrementar o endereço dos pontos para passar ao seguinte
+        #incrementar o endere�o dos pontos para passar ao seguinte
         addi t1 t1 8
-        #incrementar o endereço do vetor clusters para passar ao seguinte
+        #incrementar o endere�o do vetor clusters para passar ao seguinte
         addi t3 t3 4
-        #decrementar o número de pontos que falta verificar
+        #decrementar o n�mero de pontos que falta verificar
         addi t0 t0 -1
         j printClusters_loop_beg
     printClusters_loop_end:
@@ -245,11 +245,11 @@ calculateCentroids:
     la s2 points
     la s3 centroids
     la s4 clusters
-    li s5 0 #número de centroids percorrido
-    li s6 0 #número de pontos a considerar para a média
+    li s5 0 #n�mero de centroids percorrido
+    li s6 0 #n�mero de pontos a considerar para a m�dia
     
-    #t0 tem a média de x
-    #t1 tem a média de y
+    #t0 tem a m�dia de x
+    #t1 tem a m�dia de y
     #t2 tem x do ponto atual
     #t3 tem o y do ponto atual
     #t4 tem o cluster do ponto atual
@@ -258,6 +258,9 @@ calculateCentroids:
         lw s1 n_points
         la s2 points
         la s4 clusters
+        li t0 0
+        li t1 0
+        li s6, 0
         calculateCentroids_inner_loop:
             beq s1 x0 calculateCentroids_inner_loop_end
             lw t4 0(s4)
@@ -330,7 +333,7 @@ mainSingleCluster:
     jr ra
 ### PseudoRandomNumberGen
 # Argumentos: nenhum
-# Retorno: a0 número
+# Retorno: a0 n�mero
 PseudoRandomNumberGen:
     li a7 31
     ecall
@@ -351,7 +354,7 @@ PseudoRandomNumberGen:
 ### initializeCentroids
 #Este procedimento incializa os valores inciais do vetor centroides. 
 #Cada um dos k centroids deve ser colocado num par de coordenadas
-#escolhido de forma pseudo-aleatória
+#escolhido de forma pseudo-aleat�ria
 # Argumentos: nenhum
 # Retorno: nenhum
 initializeCentroids:
@@ -497,15 +500,41 @@ setClusters:
 
 mainKMeans:  
     # POR IMPLEMENTAR (2a parte)
-    jal cleanScreen
-    
+    addi sp, sp, -20
+    sw ra, 0(sp)
+    sw s0, 4(sp)
+    sw s1, 8(sp)
+    sw s2, 12(sp)
+    sw s3, 16(sp)
+    lw s2, L #iteracoes do outer loop
     jal initializeCentroids
-    jal printCentroids
-    jal printClusters
-    
-    jal setClusters
-    jal calculateCentroids
-    jal cleanScreen
-    jal printClusters
-    jal printCentroids
+    mainKmeans_loop:
+        lw s0, centroids #vetor centroids da ultima iteracao
+        lw s3, k #iteracoes do inner loop
+        beq s2, x0, mainKmeans_loop_end
+        jal cleanScreen
+        jal setClusters
+        jal calculateCentroids
+        lw s1, centroids #vetor centroids a seguir ao calculo dos centroids
+        jal printClusters
+        jal printCentroids
+        addi s2, s2, -1 #diminuir o numero de iteracoes restantes
+        mainKmeans_inner_loop:
+            lw t2, 0(s0) #coordenada x da iteracao anterior
+            lw t3, 4(s0) #coordenada y da iteracao anterior
+            lw t4, 0(s1) #coordenada x da iteracao atual
+            lw t5, 4(s1) #coordenada y da iteracao atual
+            bne t2, t4, mainKmeans_loop #Se as coordenadas nao forem iguais voltamos a aplicar o algoritmo
+            bne t3, t5 mainKmeans_loop
+            addi s0, s0, 8 #andar para a frente no vetor centroids
+            addi s1, s1, 8
+            beq s3,x0, mainKmeans_loop_end
+            addi s3, s3, -1 #diminuir o numero de iteracoes restantes
+    mainKmeans_loop_end:
+        lw ra, 0(sp)
+        lw s0, 4(sp)
+        lw s1, 8(sp)
+        lw s2, 12(sp)
+        lw s3, 16(sp)
+        addi sp, sp, 20
     jr ra
