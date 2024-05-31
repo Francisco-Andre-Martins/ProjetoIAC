@@ -527,8 +527,8 @@ mainKMeans:
             bne t3, t5 mainKmeans_loop
             addi s0, s0, 8 #andar para a frente no vetor centroids
             addi s1, s1, 8
-            beq s3,x0, mainKmeans_loop_end #caso em que as coordenadas dos centroids nao se alteram entre iteracoes
             addi s3, s3, -1 #diminuir o numero de iteracoes restantes
+            beq s3,x0, mainKmeans_loop_end #caso em que as coordenadas dos centroids nao se alteram entre iteracoes
     mainKmeans_loop_end:
         lw ra, 0(sp)
         lw s0, 4(sp)
