@@ -33,12 +33,12 @@
 #points:     .word 4,2, 5,1, 5,2, 5,3 6,2
 
 #Input C
-#n_points:    .word 23
-#points: .word 0,0, 0,1, 0,2, 1,0, 1,1, 1,2, 1,3, 2,0, 2,1, 5,3, 6,2, 6,3, 6,4, 7,2, 7,3, 6,8, 6,9, 7,8, 8,7, 8,8, 8,9, 9,7, 9,8
+n_points:    .word 23
+points: .word 0,0, 0,1, 0,2, 1,0, 1,1, 1,2, 1,3, 2,0, 2,1, 5,3, 6,2, 6,3, 6,4, 7,2, 7,3, 6,8, 6,9, 7,8, 8,7, 8,8, 8,9, 9,7, 9,8
 
 #Input D
-n_points:    .word 30
-points:      .word 16, 1, 17, 2, 18, 6, 20, 3, 21, 1, 17, 4, 21, 7, 16, 4, 21, 6, 19, 6, 4, 24, 6, 24, 8, 23, 6, 26, 6, 26, 6, 23, 8, 25, 7, 26, 7, 20, 4, 21, 4, 10, 2, 10, 3, 11, 2, 12, 4, 13, 4, 9, 4, 9, 3, 8, 0, 10, 4, 10
+#n_points:    .word 30
+#points:      .word 16, 1, 17, 2, 18, 6, 20, 3, 21, 1, 17, 4, 21, 7, 16, 4, 21, 6, 19, 6, 4, 24, 6, 24, 8, 23, 6, 26, 6, 26, 6, 23, 8, 25, 7, 26, 7, 20, 4, 21, 4, 10, 2, 10, 3, 11, 2, 12, 4, 13, 4, 9, 4, 9, 3, 8, 0, 10, 4, 10
 
 
 
@@ -49,7 +49,7 @@ points:      .word 16, 1, 17, 2, 18, 6, 20, 3, 21, 1, 17, 4, 21, 7, 16, 4, 21, 6
 # Valores de centroids, k e L a usar na 2a parte do prejeto:
 centroids:   .word 0,0, 10,0, 0,10
 k:           .word 3
-L:           .word 10
+L:           .word 50
 
 # Abaixo devem ser declarados o vetor clusters (2a parte) e outras estruturas de dados
 # que o grupo considere necessarias para a solucao:
@@ -151,16 +151,18 @@ printClusters:
     sw a1 4(sp)
     sw a2 8(sp)
     sw ra 12(sp)
-    # mais uma vez, devido ao conhecimento do funcionamento interno do print point, não tenho medo de usar os registos temp
-    lw t0 n_points
+    # mais uma vez, devido ao conhecimento do funcionamento interno do print point,
+    # não tenho medo de usar os registos temp
+    lw t0 n_points #decremento o t0 até chegar a zero como condição de saída
     la t1 points
-    li t6 4
+    li t6 4 #constante para usar na multiplicação
     la t3 clusters
     #t2 fica com a cor atual, refreshed em cada ciclo com o início do vetor cores
     
     printClusters_loop_beg: #percorre o vetor de pontos e coloca-os no ecrã
         beq t0 x0 printClusters_loop_end #verifica se se chegou ao final do vetor
         la t2 colors
+        #escreve para os registos de input do Printpoint as coordenadas do ponto
         lw a0 0(t1)
         lw a1 4(t1)
         lw t5 0(t3)
@@ -240,12 +242,11 @@ calculateCentroids:
     sw s6 28(sp)
     
     lw s0 k
-    #addi s0 s0 -1
     lw s1 n_points
     la s2 points
     la s3 centroids
     la s4 clusters
-    li s5 0 #número de centroids percorrido
+    li s5 0 #número de centroids percorrido, serve de iteração para o loop externo
     li s6 0 #número de pontos a considerar para a média
     
     #t0 tem a média de x
@@ -253,19 +254,20 @@ calculateCentroids:
     #t2 tem x do ponto atual
     #t3 tem o y do ponto atual
     #t4 tem o cluster do ponto atual
+    
     calculateCentroids_outer_loop:
     # o loop externo vai iterando pelos centroides
         # verificar se todos os centroides já foram calculados
         beq s0 s5 calculateCentroids_outer_loop_end
         #reiniciar as condições do loop interno
-        lw s1 n_points
+        lw s1 n_points #serve de iterador para o loop interno
         la s2 points
         la s4 clusters
         li t0 0
         li t1 0
         li s6, 0
         calculateCentroids_inner_loop: #essencialmente faz o somatório das coordenadas dos pontos
-            beq s1 x0 calculateCentroids_inner_loop_end
+            beq s1 x0 calculateCentroids_inner_loop_end #condição de saída, quando n_points é zero
             lw t4 0(s4)
             #verifica se um dado ponto está associado ao centroide a ser verificado
             beq t4 s5 calculateCentroids_if_point_in_centroid 
@@ -348,7 +350,7 @@ mainSingleCluster:
 # 1, o número de ciclos entre cada iteração da função é constante, ficando sempre o mesmo valor inicial 
 # 2, usando epoch time do sistema, se o código for executado "instantaneamente" no simulador, 
 #     não há tempo suficiente para existir separação entre as coordenadas geradas, e
-#     todos os pontos começam no mesmo valor
+#     todos os centroides começam no mesmo valor
 # Tendo isto em conta, são usados ambos os parâmetros para fazer a geração de coordenadas
 PseudoRandomNumberGen:
     li a7 31 #faço a chamada ao sistema
@@ -361,10 +363,12 @@ PseudoRandomNumberGen:
     add t2 t1 t2 #somo as duas variáveis do sistema
     rem t2 t2 t3 #faço o módulo 32 para ficar dentro da range de coordenadas possíveis
     #verifica se o número é positivo
-    bge t2 x0 PseudoRandomNumberGen_end_1stif
-    sub t2 x0 t2
+        bge t2 x0 PseudoRandomNumberGen_end_1stif
+        #faço o simétrico do valor, se fôr negativo
+        sub t2 x0 t2
     PseudoRandomNumberGen_end_1stif:
-        mv a0 t2
+    #meto o retorno no sítio
+    mv a0 t2
     jr ra
 
 
@@ -396,6 +400,7 @@ initializeCentroids:
         addi t6 t6 8
         #decrementar o número de centroides a verificar
         addi t0 t0 -1
+        #verificar se já se fizeram todos os centroides
         beq t0 x0 initializeCentroids_endloop
         j initializeCentroids_loop
     initializeCentroids_endloop:
@@ -417,7 +422,7 @@ initializeCentroids:
 manhattanDistance:
     # faço a diferença entre as coordenadas x
     sub a0 a0 a2
-    bge a0 x0 manhattanDistance_end_1stif #verifico o sinal da coordenada
+    bge a0 x0 manhattanDistance_end_1stif #verifico o sinal da diferença
     sub a0 x0 a0 #faço o simétrico, se a coordenada fôr menor que zero
     manhattanDistance_end_1stif:
     sub a1 a1 a3 #a mesma coisa para y
@@ -450,7 +455,7 @@ nearestCluster:
     sw s6 28(sp)
     lw s0, k
     la s1, centroids
-    li s2, 0 #indice do centroid atual
+    li s2, 0 #indice do centroid atual, serve de iterador, e para comparar com o clusters
     li s3, 0 #indice do centroid a retornar
     mv s4, a0 #preservar o valor do a0, uma vez que a funcao manhattanDistance returna a distancia em a0
     mv s5, a1
@@ -474,6 +479,7 @@ nearestCluster:
         addi s2, s2, 1 #incrementar o indice do cluster atual
         j nearestCluster_loop
     nearestCluster_loop_end:
+        #colocar o valor de retorno no sítio
         mv a0, s3 
         #tratar do callstack
         lw ra, 0(sp)
